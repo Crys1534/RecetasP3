@@ -121,23 +121,8 @@
             overflow: hidden;
         }
     </style>
-	
-	
-<!-- Enlazar el manifest -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#EA580C">
-
-<!-- Registrar el Service Worker -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(registration => console.log('ServiceWorker registrado con éxito'))
-        .catch(err => console.log('Error al registrar ServiceWorker: ', err));
-    });
-  }
-</script>
-
+    
+    <meta name="theme-color" content="#EA580C">
 </head>
 <body class="text-gray-800 antialiased min-h-screen flex flex-col pb-24">
 
@@ -335,18 +320,15 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, initializeFirestore, persistentLocalCache, collection, onSnapshot, addDoc, deleteDoc, doc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Environment variables
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'recipe-app-pwa-v1';
-        let firebaseConfig = null;
-        try {
-            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-                // Dummy config for fallback if needed, though usually provided by env
-                apiKey: "dummy-key",
-                projectId: "dummy-project"
-            };
-        } catch (e) {
-            console.error("No valid Firebase config found.");
-        }
+        // APP ID para separar los datos
+        const appId = 'recipe-app-pwa-v1';
+        
+        // CONFIGURACIÓN DE FIREBASE (mbweditor)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDawixERthu8gHpy-ckb8PMNVOMhlBEQMs",
+            authDomain: "mbwe-multiplayer.firebaseapp.com",
+            projectId: "mbwe-multiplayer"
+        };
 
         let app, db, auth;
         let userId = null;
