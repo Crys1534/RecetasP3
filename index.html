@@ -16,7 +16,6 @@
     
     <!-- PWA Dynamic Injection Script -->
     <script>
-        // Generate and inject manifest.json
         const manifestData = {
             "name": "Mi Recetario",
             "short_name": "Recetas",
@@ -44,6 +43,7 @@
 
     <script>
         tailwind.config = {
+            darkMode: 'class', // Habilita el modo oscuro manual
             theme: {
                 extend: {
                     fontFamily: {
@@ -67,53 +67,28 @@
 
     <style>
         body {
-            background-color: #fff7ed; /* brand-50 */
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* Hide scrollbar for clean app feel */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background-color: #fdba74;
-            border-radius: 20px;
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #fdba74; border-radius: 20px; }
 
-        .modal-enter {
-            opacity: 0;
-            transform: scale(0.95);
-        }
-        .modal-enter-active {
-            opacity: 1;
-            transform: scale(1);
-            transition: opacity 200ms, transform 200ms;
-        }
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 200ms, transform 200ms; }
         
-        .sidebar-enter {
-            transform: translateX(100%);
-        }
-        .sidebar-enter-active {
-            transform: translateX(0);
-            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .sidebar-enter { transform: translateX(100%); }
+        .sidebar-enter-active { transform: translateX(0); transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* Masonry-like grid fallback */
         .recipe-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 1rem;
         }
         @media (min-width: 640px) {
-            .recipe-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            }
+            .recipe-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
         }
 
-        /* Line clamp for description/macros */
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -124,34 +99,37 @@
     
     <meta name="theme-color" content="#EA580C">
 </head>
-<body class="text-gray-800 antialiased min-h-screen flex flex-col pb-24">
+<body class="text-gray-800 bg-brand-50 dark:bg-gray-900 dark:text-gray-100 antialiased min-h-screen flex flex-col pb-24 transition-colors duration-300">
 
-    <header class="bg-white shadow-sm sticky top-0 z-30 px-4 py-3">
+    <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-30 px-4 py-3 transition-colors duration-300">
         <div class="max-w-5xl mx-auto flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-serif font-semibold text-brand-700 flex items-center gap-2">
+                <h1 class="text-2xl font-serif font-semibold text-brand-700 dark:text-brand-500 flex items-center gap-2">
                     <i class="fa-solid fa-utensils"></i> Recetario
                 </h1>
                 
-                <!-- Action Menu -->
                 <div class="flex items-center gap-2">
-                    <button onclick="exportRecipes()" class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center hover:bg-brand-100 transition shadow-sm" aria-label="Exportar">
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition shadow-sm" aria-label="Cambiar Tema">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    
+                    <button onclick="exportRecipes()" class="w-10 h-10 rounded-full bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-500 flex items-center justify-center hover:bg-brand-100 dark:hover:bg-brand-900/50 transition shadow-sm" aria-label="Exportar">
                         <i class="fa-solid fa-file-export"></i>
                     </button>
-                    <button onclick="document.getElementById('importFile').click()" class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center hover:bg-brand-100 transition shadow-sm" aria-label="Importar">
+                    <button onclick="document.getElementById('importFile').click()" class="w-10 h-10 rounded-full bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-500 flex items-center justify-center hover:bg-brand-100 dark:hover:bg-brand-900/50 transition shadow-sm" aria-label="Importar">
                         <i class="fa-solid fa-file-import"></i>
                     </button>
-                    <button onclick="promptDeleteAll()" class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition shadow-sm" aria-label="Borrar Todo">
+                    <button onclick="promptDeleteAll()" class="w-10 h-10 rounded-full bg-red-50 dark:bg-red-900/30 text-red-500 flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/50 transition shadow-sm" aria-label="Borrar Todo">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                     <input type="file" id="importFile" accept=".json" class="hidden" onchange="importRecipes(event)">
                 </div>
             </div>
             
-            <!-- Search Bar -->
             <div class="relative">
                 <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" id="searchInput" placeholder="Buscar recetas..." class="w-full bg-gray-100 rounded-xl py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
+                <input type="text" id="searchInput" placeholder="Buscar recetas..." class="w-full bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600 rounded-xl py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-500 transition">
             </div>
         </div>
     </header>
@@ -163,59 +141,63 @@
         </div>
         
         <div id="emptyState" class="hidden flex-col items-center justify-center py-16 text-gray-400 text-center px-4">
-            <i class="fa-solid fa-book-open text-6xl mb-4 text-brand-200"></i>
-            <h2 class="text-xl font-medium text-gray-600 mb-2">No hay recetas todavía</h2>
+            <i class="fa-solid fa-book-open text-6xl mb-4 text-brand-200 dark:text-gray-700"></i>
+            <h2 class="text-xl font-medium text-gray-600 dark:text-gray-400 mb-2">No hay recetas todavía</h2>
             <p class="text-sm">Toca el botón + para agregar tu primera obra maestra culinaria.</p>
         </div>
 
-        <div id="recipeGrid" class="recipe-grid hidden">
-            <!-- Cards will be injected here -->
-        </div>
+        <div id="recipeGrid" class="recipe-grid hidden"></div>
     </main>
 
     <button onclick="openAddModal()" class="fixed bottom-6 right-6 w-14 h-14 bg-brand-600 text-white rounded-full shadow-lg shadow-brand-500/50 flex items-center justify-center text-2xl hover:bg-brand-700 hover:scale-105 active:scale-95 transition-all z-20">
         <i class="fa-solid fa-plus"></i>
     </button>
 
-    <div id="addModal" class="fixed inset-0 bg-black/60 z-50 hidden flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 backdrop-blur-sm">
-        <div class="bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl h-[85vh] sm:h-auto max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up">
-            <div class="flex items-center justify-between p-4 border-b border-gray-100 bg-brand-50">
-                <h2 class="text-lg font-serif font-bold text-brand-900">Nueva Receta</h2>
-                <button onclick="closeAddModal()" class="w-8 h-8 rounded-full bg-white text-gray-500 flex items-center justify-center shadow-sm">
+    <!-- Modal Agregar -->
+    <div id="addModalOverlay" class="fixed inset-0 bg-black/60 z-50 hidden flex flex-col justify-end sm:justify-center items-center p-0 sm:p-4 backdrop-blur-sm cursor-pointer">
+        <div id="addModalContent" class="bg-white dark:bg-gray-800 w-full sm:max-w-lg sm:rounded-2xl rounded-t-3xl h-[85vh] sm:h-[80vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up cursor-default">
+            <div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700 bg-brand-50 dark:bg-gray-900">
+                <h2 class="text-lg font-serif font-bold text-brand-900 dark:text-brand-500">Nueva Receta</h2>
+                <button onclick="closeAddModal()" class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center shadow-sm">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
             
             <div class="p-5 overflow-y-auto flex-1 custom-scrollbar">
-                <form id="recipeForm" class="flex flex-col gap-4" onsubmit="saveRecipe(event)">
+                <form id="recipeForm" class="flex flex-col gap-5" onsubmit="saveRecipe(event)">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
-                        <input type="text" id="recipeTitle" required placeholder="Ej. Pollo a la naranja" class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título</label>
+                        <input type="text" id="recipeTitle" required placeholder="Ej. Pollo a la naranja" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">URL de la Miniatura (Opcional)</label>
-                        <input type="url" id="recipeImage" placeholder="https://ejemplo.com/foto.jpg" class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL de la Miniatura (Opcional)</label>
+                        <input type="url" id="recipeImage" placeholder="https://ejemplo.com/foto.jpg" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+                        <!-- Contenedor para la vista previa de la miniatura -->
+                        <div id="imagePreviewContainer" class="hidden mt-3 h-32 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                            <img id="imagePreview" src="" alt="Vista previa" class="w-full h-full object-cover">
+                        </div>
                     </div>
-                    
+
+                    <!-- Lista Dinámica de Ingredientes -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Macros / Calorías (Opcional)</label>
-                        <input type="text" id="recipeMacros" placeholder="Ej. 650 kcal | 35g Prot | 60g Carb | 30g Grasas" class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none text-sm">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ingredientes</label>
+                        <div id="ingredientsListContainer" class="space-y-2">
+                            <!-- Los inputs se inyectan aquí -->
+                        </div>
+                    </div>
+
+                    <!-- Lista Dinámica de Pasos -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pasos de preparación</label>
+                        <div id="stepsListContainer" class="space-y-3">
+                            <!-- Los textareas se inyectan aquí -->
+                        </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Ingredientes (Separados por comas)</label>
-                        <textarea id="recipeIngredients" required rows="3" placeholder="2 rebanadas de pan, 2 rebanadas de jamón FUD, 1 rebanada de queso..." class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none resize-none"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Pasos de preparación</label>
-                        <textarea id="recipeSteps" required rows="4" placeholder="1. Tostar el pan...&#10;2. Colocar el queso..." class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none resize-none"></textarea>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Link de YouTube (Opcional)</label>
-                        <input type="url" id="recipeYoutube" placeholder="https://youtube.com/watch?v=..." class="w-full border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Link de YouTube (Opcional)</label>
+                        <input type="url" id="recipeYoutube" placeholder="https://youtube.com/watch?v=..." class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none">
                     </div>
 
                     <button type="submit" class="w-full bg-brand-600 text-white font-medium rounded-xl py-3 mt-2 hover:bg-brand-700 transition active:scale-[0.98]">
@@ -226,223 +208,197 @@
         </div>
     </div>
 
-    <div id="viewModal" class="fixed inset-0 bg-black/80 z-50 hidden flex flex-col justify-center items-center backdrop-blur-sm p-0 sm:p-6">
-        <div class="bg-white w-full h-full sm:h-[90vh] sm:max-w-2xl sm:rounded-2xl flex flex-col relative overflow-hidden shadow-2xl">
-            
-            <!-- Header Image & Close -->
-            <div class="relative h-48 sm:h-64 shrink-0 bg-gray-200">
+    <!-- Modal Ver Receta -->
+    <div id="viewModalOverlay" class="fixed inset-0 bg-black/80 z-50 hidden flex flex-col justify-center items-center backdrop-blur-sm p-0 sm:p-6 cursor-pointer">
+        <div id="viewModalContent" class="bg-white dark:bg-gray-800 w-full h-full sm:h-[90vh] sm:max-w-2xl sm:rounded-2xl flex flex-col relative overflow-hidden shadow-2xl cursor-default">
+            <div class="relative h-48 sm:h-64 shrink-0 bg-gray-200 dark:bg-gray-700">
                 <img id="viewImage" src="" alt="Receta" class="w-full h-full object-cover">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                 
-                <button onclick="closeViewModal()" class="absolute top-4 left-4 w-10 h-10 rounded-full bg-black/30 text-white flex items-center justify-center backdrop-blur-md border border-white/20 hover:bg-black/50 transition">
+                <button onclick="closeViewModal()" class="absolute top-4 left-4 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center backdrop-blur-md border border-white/20 hover:bg-black/60 transition">
                     <i class="fa-solid fa-arrow-left"></i>
                 </button>
                 
-                <button onclick="deleteCurrentRecipe()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 text-red-400 flex items-center justify-center backdrop-blur-md border border-white/20 hover:bg-black/50 transition">
+                <button onclick="deleteCurrentRecipe()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/40 text-red-400 flex items-center justify-center backdrop-blur-md border border-white/20 hover:bg-black/60 transition">
                     <i class="fa-solid fa-trash"></i>
                 </button>
                 
                 <div class="absolute bottom-4 left-4 right-4">
                     <h2 id="viewTitle" class="text-2xl sm:text-3xl font-serif font-bold text-white shadow-sm mb-1">Título</h2>
-                    <p id="viewMacros" class="text-brand-200 text-sm font-medium flex items-center gap-2">
-                        <i class="fa-solid fa-fire"></i> <span>Macros</span>
-                    </p>
                 </div>
             </div>
 
-            <!-- Content Area -->
-            <div class="flex-1 overflow-y-auto p-5 pb-20 custom-scrollbar bg-gray-50 relative">
-                
-                <!-- Action Row -->
+            <div class="flex-1 overflow-y-auto p-5 pb-20 custom-scrollbar bg-gray-50 dark:bg-gray-900 relative">
                 <div class="flex gap-3 mb-6">
-                    <button onclick="toggleSidebar()" class="flex-1 bg-brand-100 text-brand-700 py-3 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-brand-200 transition">
+                    <button onclick="toggleSidebar()" class="flex-1 bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-400 py-3 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-brand-200 dark:hover:bg-brand-900/60 transition">
                         <i class="fa-solid fa-basket-shopping"></i> Ver Ingredientes
                     </button>
-                    <a id="viewYoutube" href="#" target="_blank" class="hidden flex-1 bg-red-100 text-red-600 py-3 rounded-xl font-medium items-center justify-center gap-2 hover:bg-red-200 transition">
+                    <a id="viewYoutube" href="#" target="_blank" class="hidden flex-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 py-3 rounded-xl font-medium items-center justify-center gap-2 hover:bg-red-200 dark:hover:bg-red-900/50 transition">
                         <i class="fa-brands fa-youtube"></i> Tutorial
                     </a>
                 </div>
 
-                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2 border-b pb-2">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2 border-b dark:border-gray-700 pb-2">
                         <i class="fa-solid fa-list-ol text-brand-500"></i> Preparación
                     </h3>
-                    <div id="viewSteps" class="text-gray-600 whitespace-pre-wrap leading-relaxed text-sm sm:text-base">
-                        Pasos...
+                    <div id="viewSteps" class="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed text-sm sm:text-base space-y-3">
+                        <!-- Pasos renderizados aquí -->
                     </div>
                 </div>
             </div>
 
-            <div id="ingredientsSidebar" class="absolute inset-y-0 right-0 w-4/5 sm:w-80 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.1)] transform translate-x-full transition-transform duration-300 z-20 flex flex-col">
-                <div class="p-4 bg-brand-50 border-b border-brand-100 flex items-center justify-between shrink-0">
-                    <h3 class="font-bold text-brand-800 text-lg flex items-center gap-2">
+            <!-- Sidebar Ingredientes -->
+            <div id="ingredientsSidebar" class="absolute inset-y-0 right-0 w-4/5 sm:w-80 bg-white dark:bg-gray-800 shadow-[-10px_0_30px_rgba(0,0,0,0.1)] transform translate-x-full transition-transform duration-300 z-20 flex flex-col">
+                <div class="p-4 bg-brand-50 dark:bg-gray-900 border-b border-brand-100 dark:border-gray-700 flex items-center justify-between shrink-0">
+                    <h3 class="font-bold text-brand-800 dark:text-brand-500 text-lg flex items-center gap-2">
                         <i class="fa-solid fa-carrot"></i> Ingredientes
                     </h3>
-                    <button onclick="toggleSidebar()" class="w-8 h-8 rounded-full bg-white text-gray-500 flex items-center justify-center shadow-sm">
+                    <button onclick="toggleSidebar()" class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center justify-center shadow-sm">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
                 <div class="p-4 flex-1 overflow-y-auto custom-scrollbar">
-                    <ul id="viewIngredientsList" class="space-y-3">
-                        <!-- Ingredients injected here -->
-                    </ul>
+                    <ul id="viewIngredientsList" class="space-y-3"></ul>
                 </div>
             </div>
-            <!-- Overlay for Sidebar -->
-            <div id="sidebarOverlay" onclick="toggleSidebar()" class="absolute inset-0 bg-black/20 z-10 hidden transition-opacity"></div>
+            <div id="sidebarOverlay" onclick="toggleSidebar()" class="absolute inset-0 bg-black/40 z-10 hidden transition-opacity"></div>
         </div>
     </div>
 
     <!-- Confirm Modal -->
-    <div id="confirmModal" class="fixed inset-0 bg-black/50 z-[100] hidden flex items-center justify-center backdrop-blur-sm px-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 text-center shadow-xl">
-            <div class="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-3xl mx-auto mb-4">
+    <div id="confirmModalOverlay" class="fixed inset-0 bg-black/50 z-[100] hidden flex items-center justify-center backdrop-blur-sm px-4 cursor-pointer">
+        <div id="confirmModalContent" class="bg-white dark:bg-gray-800 rounded-2xl max-w-sm w-full p-6 text-center shadow-xl cursor-default">
+            <div class="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 flex items-center justify-center text-3xl mx-auto mb-4">
                 <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
-            <h3 id="confirmTitle" class="text-xl font-bold text-gray-900 mb-2">¿Estás seguro?</h3>
-            <p id="confirmMessage" class="text-gray-500 mb-6">Esta acción no se puede deshacer.</p>
+            <h3 id="confirmTitle" class="text-xl font-bold text-gray-900 dark:text-white mb-2">¿Estás seguro?</h3>
+            <p id="confirmMessage" class="text-gray-500 dark:text-gray-400 mb-6">Esta acción no se puede deshacer.</p>
             <div class="flex gap-3">
-                <button onclick="closeConfirmModal()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-medium hover:bg-gray-200 transition">Cancelar</button>
+                <button onclick="closeConfirmModal()" class="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 py-3 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition">Cancelar</button>
                 <button id="confirmActionBtn" class="flex-1 bg-red-600 text-white py-3 rounded-xl font-medium hover:bg-red-700 transition">Confirmar</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 -translate-y-10 opacity-0 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-3 transition-all duration-300 z-[110] pointer-events-none">
+    <!-- Toast -->
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 -translate-y-10 opacity-0 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-lg flex items-center gap-3 transition-all duration-300 z-[110] pointer-events-none">
         <i id="toastIcon" class="fa-solid fa-check-circle text-green-400"></i>
         <span id="toastMsg" class="font-medium text-sm">Mensaje</span>
     </div>
 
-    <script type="module">
-        // Firebase Imports v11.6.1
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, initializeFirestore, persistentLocalCache, collection, onSnapshot, addDoc, deleteDoc, doc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <script>
+        // --- TEMA OSCURO ---
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const toggleIcon = themeToggleBtn.querySelector('i');
 
-        // APP ID para separar los datos
-        const appId = 'recipe-app-pwa-v1';
-        
-        // CONFIGURACIÓN DE FIREBASE (mbweditor)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDawixERthu8gHpy-ckb8PMNVOMhlBEQMs",
-            authDomain: "mbwe-multiplayer.firebaseapp.com",
-            projectId: "mbwe-multiplayer"
-        };
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            html.classList.add('dark');
+            toggleIcon.classList.replace('fa-moon', 'fa-sun');
+        }
 
-        let app, db, auth;
-        let userId = null;
+        themeToggleBtn.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            if (html.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+                toggleIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                localStorage.setItem('theme', 'light');
+                toggleIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        });
+
+        // --- INDEXED DB LOGIC ---
+        const DB_NAME = 'RecetarioDB';
+        const STORE_NAME = 'recipes';
+        let db;
         let currentRecipes = [];
-        let activeRecipeId = null; // For viewing/deleting
-
-        // Ensure placeholder image
+        let activeRecipeId = null;
         const PLACEHOLDER_IMG = "https://placehold.co/400x300/ffedd5/ea580c?text=Foto+Receta";
 
-        // Setup PWA Service Worker purely for 'Add to home screen' criteria
+        // Registrar SW
         if ('serviceWorker' in navigator) {
             const swCode = `
                 self.addEventListener('install', (e) => { self.skipWaiting(); });
                 self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
                 self.addEventListener('fetch', (e) => { 
-                    // Basic fetch passthrough
                     e.respondWith(fetch(e.request).catch(() => new Response('Offline')));
                 });
             `;
-            const swBlob = new Blob([swCode], {type: 'application/javascript'});
-            const swUrl = URL.createObjectURL(swBlob);
-            
-            // Try registering
             try {
-                navigator.serviceWorker.register(swUrl)
-                    .then(reg => console.log('Dummy SW registered for PWA', reg.scope))
-                    .catch(err => console.warn('SW registration failed (expected in some sandboxes):', err));
-            } catch (e) {
-                console.warn("Security error with blob SW:", e);
-            }
+                const swBlob = new Blob([swCode], {type: 'application/javascript'});
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+            } catch(e){}
         }
 
-        // Initialize Firebase
-        if (firebaseConfig && firebaseConfig.apiKey !== "dummy-key") {
-            app = initializeApp(firebaseConfig);
-            // Enable offline persistence
-            db = initializeFirestore(app, {
-                localCache: persistentLocalCache()
-            });
-            auth = getAuth(app);
-            
-            initAuth();
-        } else {
-            document.getElementById('loadingIndicator').innerHTML = `<p class="text-red-500 font-bold">Error de configuración de Firebase.</p>`;
-        }
-
-        async function initAuth() {
-            try {
-                const authToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                if (authToken) {
-                    await signInWithCustomToken(auth, authToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                
-                userId = auth.currentUser.uid;
-                listenToRecipes();
-            } catch (error) {
-                console.error("Auth error:", error);
-                showToast("Error de autenticación", "error");
-            }
-        }
-
-        function getCollectionRef() {
-            // STRICT RULE: /artifacts/{appId}/users/{userId}/recipes
-            return collection(db, 'artifacts', appId, 'users', userId, 'recipes');
-        }
-
-        function listenToRecipes() {
-            const colRef = getCollectionRef();
-            
-            onSnapshot(colRef, (snapshot) => {
-                currentRecipes = [];
-                snapshot.forEach(docSnap => {
-                    currentRecipes.push({ id: docSnap.id, ...docSnap.data() });
-                });
-                
-                // Sort by creation time descending
-                currentRecipes.sort((a, b) => b.createdAt - a.createdAt);
-                
-                document.getElementById('loadingIndicator').classList.add('hidden');
-                
-                // If empty and it's our first time, inject the default surplus recipe
-                if (currentRecipes.length === 0) {
-                    injectDefaultRecipe();
-                } else {
-                    renderRecipes(currentRecipes);
-                }
-            }, (error) => {
-                console.error("Firestore error:", error);
-                showToast("Error al cargar recetas", "error");
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 2); // Subida de versión a 2 por cambios de modelo
+                request.onerror = (event) => reject(event.target.error);
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                request.onupgradeneeded = (event) => {
+                    const database = event.target.result;
+                    if (!database.objectStoreNames.contains(STORE_NAME)) {
+                        database.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
             });
         }
 
-        async function injectDefaultRecipe() {
-            if (!userId) return;
+        async function loadRecipes() {
+            return new Promise((resolve) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+                
+                request.onsuccess = () => {
+                    currentRecipes = request.result || [];
+                    currentRecipes.sort((a, b) => b.createdAt - a.createdAt); // Más recientes primero
+                    
+                    document.getElementById('loadingIndicator').classList.add('hidden');
+                    
+                    if (currentRecipes.length === 0) {
+                        injectDefaultRecipe();
+                    } else {
+                        renderRecipes(currentRecipes);
+                    }
+                    resolve();
+                };
+            });
+        }
+
+        function injectDefaultRecipe() {
             const defaultRecipe = {
+                id: Date.now().toString(),
                 title: "Sándwich de Jamón FUD y Queso",
                 thumbnail: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                macros: "650 kcal | 35g Prot | 60g Carb | 30g Grasas",
                 ingredients: "2 rebanadas de pan artesanal (o Bimbo Doble Fibra), 3 rebanadas de Jamón Virginia FUD, 2 rebanadas de queso manchego, 1 cucharada de mayonesa, 1/2 aguacate en rodajas, Espinacas frescas al gusto",
                 steps: "1. Tuesta ligeramente las rebanadas de pan.\n2. Unta la mayonesa en ambas caras internas del pan.\n3. Coloca una capa de espinacas y el aguacate rebanado.\n4. Añade las rebanadas de Jamón FUD y el queso manchego.\n5. Calienta en un sartén o sandwichera por 3 minutos hasta que el queso se derrita.\n6. ¡Corta por la mitad y disfruta tu comida en superávit!",
-                youtube: "https://youtube.com",
+                youtube: "",
                 createdAt: Date.now()
             };
 
-            try {
-                await addDoc(getCollectionRef(), defaultRecipe);
-                // snapshot will trigger render automatically
-            } catch (e) {
-                console.error("Error adding default:", e);
-            }
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            store.add(defaultRecipe);
+            transaction.oncomplete = () => loadRecipes();
         }
 
+        window.onload = async () => {
+            try {
+                await initDB();
+                await loadRecipes();
+            } catch(e) {
+                console.error("Error IndexedDB:", e);
+                showToast("Error al cargar la base de datos", "error");
+            }
+        };
+
+        // --- RENDER & UI LOGIC ---
         function renderRecipes(recipesToRender) {
             const grid = document.getElementById('recipeGrid');
             const emptyState = document.getElementById('emptyState');
@@ -461,68 +417,170 @@
 
             recipesToRender.forEach(recipe => {
                 const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl shadow-sm border border-brand-50 overflow-hidden cursor-pointer hover:shadow-md transition flex flex-col h-full";
+                card.className = "bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-brand-50 dark:border-gray-700 overflow-hidden cursor-pointer hover:shadow-md transition flex flex-col h-full";
                 card.onclick = () => openViewModal(recipe.id);
                 
                 const imgSrc = recipe.thumbnail || PLACEHOLDER_IMG;
                 
-                // Fallback on image error
                 card.innerHTML = `
-                    <div class="h-32 sm:h-40 overflow-hidden bg-brand-100 relative">
+                    <div class="h-32 sm:h-40 overflow-hidden bg-brand-100 dark:bg-gray-700 relative">
                         <img src="${imgSrc}" onerror="this.src='${PLACEHOLDER_IMG}'" alt="${recipe.title}" class="w-full h-full object-cover">
                     </div>
                     <div class="p-4 flex flex-col flex-1">
-                        <h3 class="font-serif font-bold text-gray-800 text-lg leading-tight mb-1 line-clamp-2">${recipe.title}</h3>
-                        ${recipe.macros ? `<p class="text-xs text-brand-600 font-medium mt-auto pt-2 line-clamp-2"><i class="fa-solid fa-fire text-brand-400"></i> ${recipe.macros}</p>` : ''}
+                        <h3 class="font-serif font-bold text-gray-800 dark:text-gray-100 text-lg leading-tight line-clamp-2">${recipe.title}</h3>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Search functionality
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const term = e.target.value.toLowerCase();
             const filtered = currentRecipes.filter(r => r.title.toLowerCase().includes(term) || (r.ingredients && r.ingredients.toLowerCase().includes(term)));
             renderRecipes(filtered);
         });
 
+        // --- VISTA PREVIA DE IMAGEN ---
+        const urlInput = document.getElementById('recipeImage');
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const previewImg = document.getElementById('imagePreview');
+
+        urlInput.addEventListener('input', () => {
+            const url = urlInput.value.trim();
+            if (url) {
+                previewImg.src = url;
+                previewContainer.classList.remove('hidden');
+            } else {
+                previewContainer.classList.add('hidden');
+                previewImg.src = '';
+            }
+        });
+
+        previewImg.onerror = () => {
+            previewImg.src = PLACEHOLDER_IMG; // Si el enlace está roto, usa el predeterminado
+        };
+
+        // --- LISTAS DINÁMICAS (Google Keep Style) ---
+        const ingContainer = document.getElementById('ingredientsListContainer');
+        const stepsContainer = document.getElementById('stepsListContainer');
+
+        function createIngredientRow(val = '') {
+            const wrap = document.createElement('div');
+            wrap.className = 'flex items-center gap-2';
+            
+            const dot = document.createElement('div');
+            dot.className = 'w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 shrink-0';
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = val;
+            input.placeholder = 'Nuevo ingrediente...';
+            input.className = 'w-full bg-transparent border-b border-gray-200 dark:border-gray-600 py-2 focus:border-brand-500 dark:focus:border-brand-500 outline-none transition-colors text-sm sm:text-base';
+            
+            input.addEventListener('input', function() {
+                // Si escribimos algo y es el último elemento, crea uno nuevo
+                if (this.value.trim() !== '' && !wrap.nextElementSibling) {
+                    ingContainer.appendChild(createIngredientRow());
+                }
+            });
+
+            wrap.appendChild(dot);
+            wrap.appendChild(input);
+            return wrap;
+        }
+
+        function createStepRow(val = '') {
+            const wrap = document.createElement('div');
+            wrap.className = 'flex items-start gap-3 bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl border border-gray-100 dark:border-gray-700';
+            
+            const num = document.createElement('span');
+            num.className = 'step-num font-bold text-gray-400 dark:text-gray-500 mt-1 shrink-0 w-5 text-right';
+            
+            const textarea = document.createElement('textarea');
+            textarea.value = val;
+            textarea.rows = 2;
+            textarea.placeholder = 'Describe este paso...';
+            textarea.className = 'w-full bg-transparent outline-none resize-none text-sm sm:text-base';
+            
+            textarea.addEventListener('input', function() {
+                if (this.value.trim() !== '' && !wrap.nextElementSibling) {
+                    stepsContainer.appendChild(createStepRow());
+                    updateStepNumbers();
+                }
+            });
+
+            wrap.appendChild(num);
+            wrap.appendChild(textarea);
+            return wrap;
+        }
+
+        function updateStepNumbers() {
+            const numbers = stepsContainer.querySelectorAll('.step-num');
+            numbers.forEach((el, index) => {
+                el.textContent = `${index + 1}.`;
+            });
+        }
+
         window.openAddModal = () => {
             document.getElementById('recipeForm').reset();
-            const modal = document.getElementById('addModal');
-            modal.classList.remove('hidden');
+            
+            // Limpiar listas y vista previa
+            ingContainer.innerHTML = '';
+            stepsContainer.innerHTML = '';
+            previewContainer.classList.add('hidden');
+            previewImg.src = '';
+            
+            // Inyectar primera fila vacía
+            ingContainer.appendChild(createIngredientRow());
+            stepsContainer.appendChild(createStepRow());
+            updateStepNumbers();
+
+            document.getElementById('addModalOverlay').classList.remove('hidden');
         };
 
-        window.closeAddModal = () => {
-            document.getElementById('addModal').classList.add('hidden');
-        };
+        window.closeAddModal = () => document.getElementById('addModalOverlay').classList.add('hidden');
 
-        window.saveRecipe = async (e) => {
+        window.saveRecipe = (e) => {
             e.preventDefault();
-            if (!userId) {
-                showToast("Debes esperar a conectar.", "error");
+
+            // Recolectar ingredientes (omitir vacíos)
+            const ingInputs = Array.from(ingContainer.querySelectorAll('input'));
+            const finalIngredients = ingInputs.map(input => input.value.trim()).filter(val => val !== '').join(', ');
+
+            // Recolectar pasos (omitir vacíos)
+            const stepTextareas = Array.from(stepsContainer.querySelectorAll('textarea'));
+            const finalSteps = stepTextareas
+                .map(t => t.value.trim())
+                .filter(val => val !== '')
+                .map((val, idx) => `${idx + 1}. ${val}`) // Formatearlo como "1. Texto"
+                .join('\n');
+
+            // Validar que al menos haya un ingrediente y un paso
+            if (!finalIngredients || !finalSteps) {
+                showToast("Agrega al menos 1 ingrediente y 1 paso", "error");
                 return;
             }
 
             const newRecipe = {
+                id: Date.now().toString(),
                 title: document.getElementById('recipeTitle').value.trim(),
                 thumbnail: document.getElementById('recipeImage').value.trim(),
-                macros: document.getElementById('recipeMacros').value.trim(),
-                ingredients: document.getElementById('recipeIngredients').value.trim(),
-                steps: document.getElementById('recipeSteps').value.trim(),
+                ingredients: finalIngredients,
+                steps: finalSteps,
                 youtube: document.getElementById('recipeYoutube').value.trim(),
                 createdAt: Date.now()
             };
 
-            closeAddModal();
-            
-            try {
-                await addDoc(getCollectionRef(), newRecipe);
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.add(newRecipe);
+
+            request.onsuccess = () => {
+                closeAddModal();
                 showToast("¡Receta guardada!", "success");
-            } catch (error) {
-                console.error("Error saving:", error);
-                showToast("Error al guardar", "error");
-            }
+                loadRecipes();
+            };
+            request.onerror = () => showToast("Error al guardar", "error");
         };
 
         window.openViewModal = (id) => {
@@ -533,15 +591,18 @@
             document.getElementById('viewImage').src = recipe.thumbnail || PLACEHOLDER_IMG;
             document.getElementById('viewTitle').textContent = recipe.title;
             
-            const macrosEl = document.getElementById('viewMacros');
-            if (recipe.macros) {
-                macrosEl.innerHTML = `<i class="fa-solid fa-fire text-brand-400"></i> <span>${recipe.macros}</span>`;
-                macrosEl.style.display = 'flex';
-            } else {
-                macrosEl.style.display = 'none';
-            }
-
-            document.getElementById('viewSteps').textContent = recipe.steps;
+            // Renderizar pasos respetando saltos de línea (ahora guardados con número)
+            const stepsDiv = document.getElementById('viewSteps');
+            stepsDiv.innerHTML = '';
+            
+            const stepsArray = recipe.steps.split('\n');
+            stepsArray.forEach(stepText => {
+                if(stepText.trim() === '') return;
+                const p = document.createElement('p');
+                p.className = 'bg-gray-50 dark:bg-gray-700/30 p-3 rounded-xl border border-gray-100 dark:border-gray-700';
+                p.textContent = stepText;
+                stepsDiv.appendChild(p);
+            });
             
             const ytBtn = document.getElementById('viewYoutube');
             if (recipe.youtube) {
@@ -553,20 +614,18 @@
                 ytBtn.classList.remove('flex');
             }
 
-            // Parse ingredients
             const ingList = document.getElementById('viewIngredientsList');
             ingList.innerHTML = '';
             const ingArray = recipe.ingredients.split(',').map(i => i.trim()).filter(i => i);
             ingArray.forEach(ing => {
                 const li = document.createElement('li');
-                li.className = "flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition cursor-pointer";
+                li.className = "flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer";
                 li.innerHTML = `
-                    <div class="mt-1 flex-shrink-0 w-5 h-5 rounded border-2 border-brand-300 flex items-center justify-center text-white transition-colors">
+                    <div class="mt-1 flex-shrink-0 w-5 h-5 rounded border-2 border-brand-300 dark:border-brand-500/50 flex items-center justify-center text-white transition-colors">
                         <i class="fa-solid fa-check text-xs opacity-0 transition-opacity"></i>
                     </div>
-                    <span class="text-gray-700">${ing}</span>
+                    <span class="text-gray-700 dark:text-gray-300">${ing}</span>
                 `;
-                // Toggle checkbox logic
                 li.onclick = function() {
                     const box = this.querySelector('div');
                     const icon = this.querySelector('i');
@@ -574,35 +633,33 @@
                     
                     if (box.classList.contains('bg-brand-500')) {
                         box.classList.remove('bg-brand-500', 'border-brand-500');
-                        box.classList.add('border-brand-300');
+                        box.classList.add('border-brand-300', 'dark:border-brand-500/50');
                         icon.classList.add('opacity-0');
-                        text.classList.remove('line-through', 'text-gray-400');
+                        text.classList.remove('line-through', 'text-gray-400', 'dark:text-gray-500');
                     } else {
                         box.classList.add('bg-brand-500', 'border-brand-500');
-                        box.classList.remove('border-brand-300');
+                        box.classList.remove('border-brand-300', 'dark:border-brand-500/50');
                         icon.classList.remove('opacity-0');
-                        text.classList.add('line-through', 'text-gray-400');
+                        text.classList.add('line-through', 'text-gray-400', 'dark:text-gray-500');
                     }
                 };
                 ingList.appendChild(li);
             });
 
-            document.getElementById('viewModal').classList.remove('hidden');
-            // Ensure sidebar is closed when opening new recipe
+            document.getElementById('viewModalOverlay').classList.remove('hidden');
             const sidebar = document.getElementById('ingredientsSidebar');
             sidebar.classList.add('translate-x-full');
             document.getElementById('sidebarOverlay').classList.add('hidden');
         };
 
         window.closeViewModal = () => {
-            document.getElementById('viewModal').classList.add('hidden');
+            document.getElementById('viewModalOverlay').classList.add('hidden');
             activeRecipeId = null;
         };
 
         window.toggleSidebar = () => {
             const sidebar = document.getElementById('ingredientsSidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
             if (sidebar.classList.contains('translate-x-full')) {
                 sidebar.classList.remove('translate-x-full');
                 overlay.classList.remove('hidden');
@@ -612,44 +669,49 @@
             }
         };
 
+        // --- CERRAR AL HACER CLIC FUERA ---
+        document.getElementById('addModalOverlay').addEventListener('click', (e) => {
+            if(e.target === document.getElementById('addModalOverlay')) closeAddModal();
+        });
+        
+        document.getElementById('viewModalOverlay').addEventListener('click', (e) => {
+            if(e.target === document.getElementById('viewModalOverlay')) closeViewModal();
+        });
+        
+        document.getElementById('confirmModalOverlay').addEventListener('click', (e) => {
+            if(e.target === document.getElementById('confirmModalOverlay')) closeConfirmModal();
+        });
+
+        // --- LÓGICA DE CONFIRMACIÓN Y BORRADO ---
         function triggerConfirm(title, message, onConfirm) {
             document.getElementById('confirmTitle').textContent = title;
             document.getElementById('confirmMessage').textContent = message;
             const btn = document.getElementById('confirmActionBtn');
             
-            // Remove old listeners
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
-            
             newBtn.addEventListener('click', () => {
                 closeConfirmModal();
                 onConfirm();
             });
-            
-            document.getElementById('confirmModal').classList.remove('hidden');
+            document.getElementById('confirmModalOverlay').classList.remove('hidden');
         }
 
-        window.closeConfirmModal = () => {
-            document.getElementById('confirmModal').classList.add('hidden');
-        };
+        window.closeConfirmModal = () => document.getElementById('confirmModalOverlay').classList.add('hidden');
 
         window.deleteCurrentRecipe = () => {
             if (!activeRecipeId) return;
-            triggerConfirm(
-                "Borrar Receta",
-                "¿Estás seguro de que quieres eliminar esta receta de tu colección?",
-                async () => {
-                    if (!userId) return;
-                    try {
-                        await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'recipes', activeRecipeId));
-                        showToast("Receta eliminada", "success");
-                        closeViewModal();
-                    } catch (e) {
-                        console.error(e);
-                        showToast("Error al eliminar", "error");
-                    }
-                }
-            );
+            triggerConfirm("Borrar Receta", "¿Estás seguro de que quieres eliminar esta receta de tu colección?", () => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.delete(activeRecipeId);
+                
+                transaction.oncomplete = () => {
+                    showToast("Receta eliminada", "success");
+                    closeViewModal();
+                    loadRecipes();
+                };
+            });
         };
 
         window.promptDeleteAll = () => {
@@ -657,24 +719,16 @@
                 showToast("No hay recetas para borrar.", "info");
                 return;
             }
-            triggerConfirm(
-                "¡Cuidado!",
-                "Estás a punto de borrar TODAS tus recetas. Esto no se puede deshacer.",
-                async () => {
-                    if (!userId) return;
-                    try {
-                        const batch = writeBatch(db);
-                        currentRecipes.forEach(r => {
-                            batch.delete(doc(db, 'artifacts', appId, 'users', userId, 'recipes', r.id));
-                        });
-                        await batch.commit();
-                        showToast("Todas las recetas eliminadas", "success");
-                    } catch (e) {
-                        console.error(e);
-                        showToast("Error al borrar", "error");
-                    }
-                }
-            );
+            triggerConfirm("¡Cuidado!", "Estás a punto de borrar TODAS tus recetas. Esto no se puede deshacer.", () => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.clear();
+                
+                transaction.oncomplete = () => {
+                    showToast("Todas las recetas eliminadas", "success");
+                    loadRecipes();
+                };
+            });
         };
 
         window.exportRecipes = () => {
@@ -682,12 +736,10 @@
                 showToast("No hay recetas para exportar.", "info");
                 return;
             }
-            // Strip the Firestore IDs for clean export
-            const cleanRecipes = currentRecipes.map(({id, ...rest}) => rest);
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cleanRecipes, null, 2));
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentRecipes, null, 2));
             const downloadAnchorNode = document.createElement('a');
             downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "mis_recetas.json");
+            downloadAnchorNode.setAttribute("download", "mis_recetas_local.json");
             document.body.appendChild(downloadAnchorNode);
             downloadAnchorNode.click();
             downloadAnchorNode.remove();
@@ -699,38 +751,33 @@
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = async (e) => {
+            reader.onload = (e) => {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    if (!Array.isArray(imported)) throw new Error("El archivo no es un array de recetas válido.");
-                    
-                    if (!userId) return;
+                    if (!Array.isArray(imported)) throw new Error("Formato inválido");
                     
                     showToast("Importando...", "info");
                     
-                    // Simple batch insert for up to 500 records
-                    const batch = writeBatch(db);
+                    const transaction = db.transaction([STORE_NAME], 'readwrite');
+                    const store = transaction.objectStore(STORE_NAME);
+                    
                     let count = 0;
                     imported.forEach(rec => {
-                        if(rec.title && rec.ingredients && rec.steps) {
-                            const newRef = doc(collection(db, 'artifacts', appId, 'users', userId, 'recipes'));
-                            batch.set(newRef, { ...rec, createdAt: Date.now() + count });
+                        if (rec.title && rec.ingredients && rec.steps) {
+                            if (!rec.id) rec.id = (Date.now() + count).toString();
+                            store.put(rec);
                             count++;
                         }
                     });
                     
-                    if(count > 0) {
-                        await batch.commit();
+                    transaction.oncomplete = () => {
                         showToast(`${count} recetas importadas`, "success");
-                    } else {
-                        showToast("No se encontraron recetas válidas", "error");
-                    }
+                        loadRecipes();
+                    };
 
                 } catch (err) {
-                    console.error("Import error:", err);
                     showToast("Error al leer el archivo JSON", "error");
                 }
-                // Reset file input
                 document.getElementById('importFile').value = "";
             };
             reader.readAsText(file);
@@ -743,15 +790,10 @@
             const iconEl = document.getElementById('toastIcon');
             
             msgEl.textContent = message;
-            
             iconEl.className = '';
-            if (type === 'success') {
-                iconEl.className = 'fa-solid fa-check-circle text-green-400';
-            } else if (type === 'error') {
-                iconEl.className = 'fa-solid fa-circle-exclamation text-red-400';
-            } else {
-                iconEl.className = 'fa-solid fa-info-circle text-blue-400';
-            }
+            if (type === 'success') iconEl.className = 'fa-solid fa-check-circle text-green-400';
+            else if (type === 'error') iconEl.className = 'fa-solid fa-circle-exclamation text-red-400';
+            else iconEl.className = 'fa-solid fa-info-circle text-blue-400';
 
             toast.classList.remove('translate-y-10', 'opacity-0');
             toast.classList.add('translate-y-0', 'opacity-100');
@@ -763,7 +805,6 @@
             }, 3000);
         }
 
-        // Handle Escape key to close modals
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeAddModal();
